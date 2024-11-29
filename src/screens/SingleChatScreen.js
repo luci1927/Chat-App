@@ -1,108 +1,119 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
-  StatusBar,
+  Image,
+  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
+  StatusBar,
+  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import MessageBubble from '../components/MessageBubble';
+import { useTheme } from '../context/ThemeContext';
 import ChatInput from '../components/ChatInput';
+import MessageBubble from '../components/MessageBubble';
 import { DUMMY_CHATS } from '../data/dummy-data';
 
 const SingleChatScreen = ({ route, navigation }) => {
+  const { colors } = useTheme();
   const { chatId, name } = route.params || {};
-  const chat = DUMMY_CHATS.find(c => c.id === chatId) || DUMMY_CHATS[0];
-  const [messages, setMessages] = useState(chat.messages || []);
+  const [messages, setMessages] = useState([]);
+  const flatListRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // Set up the initial messages from dummy data
+    const chat = DUMMY_CHATS.find(chat => chat.id === chatId);
+    if (chat) {
+      setMessages(chat.messages || []);
+    }
+  }, [chatId]);
+
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
-      headerTitle: () => null,
+      headerTitleAlign: 'left',
+      headerTitle: () => (
+        <TouchableOpacity 
+          style={styles.headerTitle}
+          onPress={() => navigation.navigate('FriendProfile')}
+        >
+          <Image 
+            source={{ uri: DUMMY_CHATS.find(c => c.id === chatId)?.avatar }} 
+            style={styles.headerAvatar} 
+          />
+          <View style={styles.headerInfo}>
+            <Text style={styles.headerName}>
+              {DUMMY_CHATS.find(c => c.id === chatId)?.name}
+            </Text>
+            <Text style={styles.headerStatus}>online</Text>
+          </View>
+        </TouchableOpacity>
+      ),
       headerLeft: () => (
-        <View style={styles.headerLeft}>
-          <TouchableOpacity 
-            onPress={() => navigation.goBack()} 
-            style={styles.backButton}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 0 }}
-          >
-            <Ionicons name="chevron-back-outline" size={26} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.headerTitleContainer}
-            onPress={() => {/* Handle profile press */}}
-          >
-            <Image 
-              source={{ uri: chat.avatar }} 
-              style={styles.avatarImage} 
-            />
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>{chat.name}</Text>
-              <Text style={styles.headerSubtitle}>online</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity 
+          style={styles.headerBackButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={28} color="#fff" />
+        </TouchableOpacity>
       ),
       headerRight: () => (
-        <View style={styles.headerRightIcons}>
-          <TouchableOpacity style={styles.headerIcon}>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerButton}>
             <Ionicons name="videocam" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIcon}>
+          <TouchableOpacity style={styles.headerButton}>
             <Ionicons name="call" size={22} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIcon}>
+          <TouchableOpacity style={styles.headerButton}>
             <Ionicons name="ellipsis-vertical" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
       ),
       headerStyle: {
-        backgroundColor: '#128C7E',
+        backgroundColor: colors.primary,
         elevation: 0,
         shadowOpacity: 0,
       },
-      headerTintColor: '#fff',
     });
-  }, [navigation, chatId, name]);
+  }, [navigation, chatId, name, colors]);
 
-  const sendMessage = (messageData) => {
+  const handleSendMessage = (messageData) => {
     const newMessage = {
-      id: Date.now().toString(),
-      text: messageData.text,
-      timestamp: new Date().toISOString(),
+      id: String(Date.now()),
+      ...messageData,
       isSent: true,
     };
-    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+    
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd();
+    }, 100);
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#128C7E" />
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
       <KeyboardAvoidingView 
         style={[styles.container, styles.keyboardAvoidingView]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
-        <View style={styles.backgroundPattern} />
-        <View style={styles.messagesContainer}>
-          <FlatList
-            data={messages}
-            renderItem={({ item }) => <MessageBubble message={item} />}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.messagesList}
-            inverted={false}
-            showsVerticalScrollIndicator={false}
-            initialScrollIndex={0}
-            ListHeaderComponent={<View style={styles.messageListHeader} />}
-          />
-        </View>
-        <ChatInput onSend={sendMessage} />
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={({ item }) => (
+            <MessageBubble message={item} />
+          )}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.messageList}
+          onLayout={() => flatListRef.current?.scrollToEnd()}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
+        />
+        <ChatInput onSend={handleSendMessage} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -111,82 +122,50 @@ const SingleChatScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-
   },
   container: {
     flex: 1,
-    backgroundColor: '#E5DDD5',
   },
   keyboardAvoidingView: {
     flex: 1,
-    backgroundColor: '#F0F2F5',
   },
-  backgroundPattern: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0.05,
-    backgroundColor: '#000',
+  messageList: {
+    paddingVertical: 16,
   },
-  headerLeft: {
+  headerTitle: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 50,
   },
-  headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: -30,
-  },
-  avatarImage: {
+  headerAvatar: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    marginRight: 8,
+    marginRight: 10,
   },
-  headerTextContainer: {
+  headerInfo: {
     justifyContent: 'center',
   },
-  headerTitle: {
-    color: '#fff',
+  headerName: {
     fontSize: 17,
     fontWeight: '600',
-  },
-  headerSubtitle: {
     color: '#fff',
-    fontSize: 12,
-    opacity: 0.8,
   },
-  headerRightIcons: {
+  headerStatus: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  headerBackButton: {
+    marginLeft: -8,
+    padding: 8,
+  },
+  headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  headerIcon: {
-    paddingHorizontal: 10,
-  },
-  backButton: {
-    marginLeft: 6,
-    paddingRight: 0,
-    justifyContent: 'center',
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  messagesContainer: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-  messagesList: {
-    flexGrow: 0,
-    paddingTop: 10,
-  },
-  messageListHeader: {
-    height: 8,
+  headerButton: {
+    padding: 8,
+    marginLeft: 4,
   },
 });
 

@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Platform } from 'react-native';
 import { format } from 'date-fns';
+import { useTheme } from '../context/ThemeContext';
 
 const MessageBubble = ({ message }) => {
+  const { colors, isDarkMode } = useTheme();
   const formattedTime = format(new Date(message.timestamp), 'HH:mm');
   
   return (
@@ -10,18 +12,40 @@ const MessageBubble = ({ message }) => {
       styles.container,
       message.isSent ? styles.sent : styles.received
     ]}>
-      <View style={styles.messageContent}>
+      <View style={[
+        styles.messageContent,
+        message.isSent ? [
+          styles.sentContent,
+          { backgroundColor: isDarkMode ? colors.primary : colors.messageBubble }
+        ] : [
+          styles.receivedContent,
+          { backgroundColor: colors.surface }
+        ]
+      ]}>
         {message.image && (
           <Image 
-            source={{ uri: message.image.uri }} 
-            style={styles.image}
-            resizeMode="cover"
+            source={{ uri: message.image }} 
+            style={styles.messageImage} 
           />
         )}
         {message.text && (
-          <Text style={styles.text}>{message.text}</Text>
+          <Text style={[
+            styles.text,
+            { color: message.isSent ? (isDarkMode ? '#fff' : colors.messageText) : colors.text }
+          ]}>
+            {message.text}
+          </Text>
         )}
-        <Text style={styles.timestamp}>{formattedTime}</Text>
+        <Text style={[
+          styles.timestamp,
+          { 
+            color: message.isSent 
+              ? (isDarkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)') 
+              : colors.textSecondary 
+          }
+        ]}>
+          {formattedTime}
+        </Text>
       </View>
     </View>
   );
@@ -29,43 +53,57 @@ const MessageBubble = ({ message }) => {
 
 const styles = StyleSheet.create({
   container: {
-    maxWidth: '80%',
-    marginVertical: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
+    marginVertical: 4,
+    paddingHorizontal: 8,
   },
   messageContent: {
     flexDirection: 'column',
+    padding: 8,
+    borderRadius: 12,
+    maxWidth: '80%',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.18,
+        shadowRadius: 1.0,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
   sent: {
     alignSelf: 'flex-end',
-    backgroundColor: '#E7FFDB',
-    borderTopRightRadius: 2,
     marginLeft: '20%',
   },
   received: {
     alignSelf: 'flex-start',
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 2,
     marginRight: '20%',
+  },
+  sentContent: {
+    borderTopRightRadius: 4,
+  },
+  receivedContent: {
+    borderTopLeftRadius: 4,
   },
   text: {
     fontSize: 16,
-    color: '#000',
     lineHeight: 20,
-    marginRight: 40,
+    marginRight: 36,
   },
   timestamp: {
     fontSize: 11,
-    color: '#667781',
     alignSelf: 'flex-end',
     marginTop: 1,
     position: 'absolute',
-    right: 0,
-    bottom: 0,
+    right: 8,
+    bottom: 8,
   },
-  image: {
+  messageImage: {
     width: 200,
     height: 200,
     borderRadius: 8,

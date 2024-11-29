@@ -4,53 +4,41 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Keyboard,
   Platform,
-  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 
 const ChatInput = ({ onSend }) => {
   const [message, setMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const { colors } = useTheme();
 
   const handleSend = () => {
     if (message.trim().length > 0) {
       onSend({ text: message.trim() });
       setMessage('');
-      Keyboard.dismiss();
     }
   };
 
-  const handleFocus = () => {
-    setIsTyping(true);
-  };
-
-  const handleBlur = () => {
-    setIsTyping(false);
-  };
-
   return (
-    <View style={styles.container}>
-      <View style={styles.inputContainer}>
+    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+      <View style={[styles.inputContainer, { backgroundColor: colors.background }]}>
         <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="add-circle" size={20} color="#128C7E" />
+          <Ionicons name="add-circle" size={20} color={colors.primary} />
         </TouchableOpacity>
         
-        <View style={styles.textInputWrapper}>
+        <View style={[styles.textInputWrapper, { backgroundColor: colors.surface }]}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="Message"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textSecondary}
             value={message}
             onChangeText={setMessage}
             multiline
             maxHeight={100}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
           />
           <TouchableOpacity style={styles.attachButton}>
-            <Ionicons name="camera-outline" size={20} color="#128C7E" />
+            <Ionicons name="camera-outline" size={20} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -59,11 +47,11 @@ const ChatInput = ({ onSend }) => {
           onPress={message.trim().length > 0 ? handleSend : undefined}
         >
           {message.trim().length > 0 ? (
-            <View style={styles.sendButtonInner}>
+            <View style={[styles.sendButtonInner, { backgroundColor: colors.primary }]}>
               <Ionicons name="send" size={16} color="#fff" />
             </View>
           ) : (
-            <Ionicons name="mic" size={20} color="#128C7E" />
+            <Ionicons name="mic" size={20} color={colors.primary} />
           )}
         </TouchableOpacity>
       </View>
@@ -73,22 +61,19 @@ const ChatInput = ({ onSend }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#F0F2F5',
     paddingVertical: 4,
     paddingHorizontal: 4,
     borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    borderTopColor: 'rgba(0,0,0,0.1)',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F2F5',
   },
   textInputWrapper: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
     borderRadius: 18,
     marginHorizontal: 4,
     paddingVertical: Platform.OS === 'ios' ? 4 : 1,
@@ -109,7 +94,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#000',
     maxHeight: 100,
     paddingTop: Platform.OS === 'ios' ? 4 : 1,
     paddingBottom: Platform.OS === 'ios' ? 4 : 1,
@@ -129,7 +113,6 @@ const styles = StyleSheet.create({
     marginRight: -4,
   },
   sendButtonInner: {
-    backgroundColor: '#128C7E',
     width: 28,
     height: 28,
     borderRadius: 14,

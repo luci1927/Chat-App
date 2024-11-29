@@ -6,119 +6,124 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
 
 const SettingsScreen = ({ navigation }) => {
-  const [isDarkMode, setIsDarkMode] = React.useState(false);
-  const [notifications, setNotifications] = React.useState(true);
+  const { isDarkMode, colors, toggleTheme } = useTheme();
 
-  const renderSettingsItem = (icon, title, value, onPress, showArrow = true) => (
+  const renderSection = (title, content, icon, onPress, rightComponent = null) => (
     <TouchableOpacity 
-      style={styles.settingsItem} 
+      style={[styles.section, { borderBottomColor: colors.border, backgroundColor: colors.surface }]} 
       onPress={onPress}
     >
-      <View style={styles.settingsItemLeft}>
-        <Ionicons name={icon} size={24} color="#128C7E" style={styles.icon} />
-        <Text style={styles.settingsItemText}>{title}</Text>
+      <View style={styles.sectionIcon}>
+        <Ionicons name={icon} size={22} color={colors.primary} />
       </View>
-      <View style={styles.settingsItemRight}>
-        {typeof value === 'boolean' ? (
-          <Switch
-            value={value}
-            onValueChange={onPress}
-            trackColor={{ false: "#767577", true: "#128C7E" }}
-            thumbColor={value ? "#fff" : "#f4f3f4"}
-          />
-        ) : (
-          <>
-            {value && <Text style={styles.settingsItemValue}>{value}</Text>}
-            {showArrow && <Ionicons name="chevron-forward" size={20} color="#666" />}
-          </>
-        )}
+      <View style={styles.sectionContent}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
+        {content && <Text style={[styles.sectionText, { color: colors.textSecondary }]}>{content}</Text>}
       </View>
+      {rightComponent || (
+        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+      )}
     </TouchableOpacity>
   );
 
-  const settingsSections = [
-    {
-      title: 'General',
-      items: [
-        {
-          icon: 'moon',
-          title: 'Dark Mode',
-          value: isDarkMode,
-          onPress: () => setIsDarkMode(!isDarkMode),
-        },
-        {
-          icon: 'notifications',
-          title: 'Notifications',
-          value: notifications,
-          onPress: () => setNotifications(!notifications),
-        },
-        {
-          icon: 'language',
-          title: 'Language',
-          value: 'English',
-          onPress: () => {},
-        },
-      ],
-    },
-    {
-      title: 'Privacy',
-      items: [
-        {
-          icon: 'lock-closed',
-          title: 'Privacy Settings',
-          onPress: () => {},
-        },
-        {
-          icon: 'eye-off',
-          title: 'Last Seen',
-          value: 'Everyone',
-          onPress: () => {},
-        },
-      ],
-    },
-    {
-      title: 'Help',
-      items: [
-        {
-          icon: 'help-circle',
-          title: 'Help Center',
-          onPress: () => {},
-        },
-        {
-          icon: 'information-circle',
-          title: 'About',
-          onPress: () => {},
-        },
-      ],
-    },
-  ];
+  const renderSwitch = (value, onValueChange) => (
+    <Switch
+      value={value}
+      onValueChange={onValueChange}
+      trackColor={{ false: '#D1D1D6', true: colors.success }}
+      ios_backgroundColor="#D1D1D6"
+    />
+  );
 
   return (
-    <ScrollView style={styles.container}>
-      {settingsSections.map((section, index) => (
-        <View key={index} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <View style={styles.sectionContent}>
-            {section.items.map((item, itemIndex) => (
-              <React.Fragment key={itemIndex}>
-                {renderSettingsItem(
-                  item.icon,
-                  item.title,
-                  item.value,
-                  item.onPress
-                )}
-                {itemIndex < section.items.length - 1 && (
-                  <View style={styles.separator} />
-                )}
-              </React.Fragment>
-            ))}
-          </View>
-        </View>
-      ))}
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.settingsGroup, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.groupTitle, { color: colors.textSecondary }]}>App Settings</Text>
+        {renderSection(
+          'Theme',
+          isDarkMode ? 'Dark' : 'Light',
+          isDarkMode ? 'moon' : 'sunny-outline',
+          toggleTheme,
+          renderSwitch(isDarkMode, toggleTheme)
+        )}
+        {renderSection(
+          'Chat Wallpaper',
+          null,
+          'image-outline',
+          () => {}
+        )}
+        {renderSection(
+          'Notifications',
+          null,
+          'notifications-outline',
+          () => {},
+          renderSwitch(true, () => {})
+        )}
+        {renderSection(
+          'App Language',
+          'English',
+          'language-outline',
+          () => {}
+        )}
+      </View>
+
+      <View style={[styles.settingsGroup, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.groupTitle, { color: colors.textSecondary }]}>Data and Storage</Text>
+        {renderSection(
+          'Storage Usage',
+          '1.2 GB',
+          'server-outline',
+          () => {}
+        )}
+        {renderSection(
+          'Network Usage',
+          '25.5 MB',
+          'cellular-outline',
+          () => {}
+        )}
+        {renderSection(
+          'Auto-Download Media',
+          'Wi-Fi and Cellular',
+          'cloud-download-outline',
+          () => {}
+        )}
+      </View>
+
+      <View style={[styles.settingsGroup, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.groupTitle, { color: colors.textSecondary }]}>Help</Text>
+        {renderSection(
+          'FAQ',
+          null,
+          'help-circle-outline',
+          () => {}
+        )}
+        {renderSection(
+          'Contact Us',
+          null,
+          'mail-outline',
+          () => {}
+        )}
+        {renderSection(
+          'Privacy Policy',
+          null,
+          'shield-checkmark-outline',
+          () => {}
+        )}
+      </View>
+
+      <TouchableOpacity 
+        style={[styles.logoutButton, { backgroundColor: colors.surface }]}
+      >
+        <Text style={[styles.logoutText, { color: colors.danger }]}>Log Out</Text>
+      </TouchableOpacity>
+
+      <Text style={[styles.version, { color: colors.textSecondary }]}>ChatApp v1.0.0</Text>
     </ScrollView>
   );
 };
@@ -126,56 +131,55 @@ const SettingsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+  },
+  settingsGroup: {
+    marginTop: 24,
+    paddingHorizontal: 16,
+  },
+  groupTitle: {
+    fontSize: 14,
+    marginLeft: 8,
+    marginBottom: 8,
+    marginTop: -12,
   },
   section: {
-    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sectionContent: {
+    flex: 1,
+    marginLeft: 12,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#128C7E',
-    marginLeft: 20,
-    marginBottom: 5,
   },
-  sectionContent: {
-    backgroundColor: '#fff',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#ccc',
+  sectionText: {
+    fontSize: 14,
+    marginTop: 2,
   },
-  settingsItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    backgroundColor: '#fff',
-  },
-  settingsItemLeft: {
-    flexDirection: 'row',
+  logoutButton: {
+    marginTop: 24,
+    marginBottom: 8,
+    paddingVertical: 16,
     alignItems: 'center',
   },
-  settingsItemRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    marginRight: 15,
-  },
-  settingsItemText: {
+  logoutText: {
     fontSize: 16,
-    color: '#000',
+    fontWeight: '500',
   },
-  settingsItemValue: {
-    fontSize: 16,
-    color: '#666',
-    marginRight: 10,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#ccc',
-    marginLeft: 60,
+  version: {
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 32,
+    fontSize: 14,
   },
 });
 
