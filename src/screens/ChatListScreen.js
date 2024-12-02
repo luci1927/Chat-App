@@ -1,26 +1,68 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import ChatListItem from '../components/ChatListItem';
+import HeaderMenu from '../components/HeaderMenu';
 import { DUMMY_CHATS } from '../data/dummy-data';
 
 const ChatListScreen = ({ navigation }) => {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerStyle: {
+        backgroundColor: isDarkMode ? '#000' : '#fff',
+      },
+      headerTintColor: isDarkMode ? '#fff' : '#000',
+      headerTitleStyle: {
+        color: isDarkMode ? '#fff' : '#000',
+        fontSize: 32,
+        fontWeight: 'bold',
+      },
+      headerRight: () => (
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.headerButton}>
+            <Ionicons name="camera-outline" size={24} color={isDarkMode ? '#fff' : '#000'} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[
+              styles.headerButton,
+              { backgroundColor: isDarkMode ? 'transparent' : 'transparent' }
+            ]}>
+            <Ionicons 
+              name="search-outline" 
+              size={24} 
+              color={isDarkMode ? '#fff' : '#000000'} 
+            />
+          </TouchableOpacity>
+          <HeaderMenu />
+        </View>
+      ),
+    });
+  }, [navigation, isDarkMode]);
 
   const renderChatItem = ({ item }) => (
-    <ChatListItem
-      chat={item}
-      onPress={() => navigation.navigate('SingleChat', { 
-        chatId: item.id,
-        name: item.name
-      })}
-    />
+    <View style={{ backgroundColor: colors.background }}>
+      <ChatListItem
+        chat={item}
+        onPress={() => navigation.navigate('SingleChat', { 
+          chatId: item.id,
+          name: item.name
+        })}
+        textColor={colors.text}
+        lastMessageColor={colors.text}
+        timeColor={colors.text}
+        borderColor={colors.border}
+      />
+    </View>
   );
 
   return (
@@ -35,7 +77,7 @@ const ChatListScreen = ({ navigation }) => {
       />
       <TouchableOpacity 
         style={[styles.fab, { backgroundColor: colors.primary }]}
-        onPress={() => {/* Handle new chat */}}
+        onPress={() => navigation.navigate('NewChat')}
       >
         <Ionicons name="chatbubble-ellipses" size={24} color="#fff" />
       </TouchableOpacity>
@@ -68,6 +110,18 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+    
+  },
+  headerButton: {
+    marginLeft: 20,
+    padding: 4,
+    borderRadius: 20,
   },
 });
 

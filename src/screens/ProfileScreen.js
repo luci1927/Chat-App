@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -6,183 +6,85 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 
 const ProfileScreen = ({ navigation }) => {
-  const { colors, isDarkMode, toggleTheme } = useTheme();
-  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
-  const [isReadReceiptsEnabled, setIsReadReceiptsEnabled] = useState(true);
+  const { colors, isDarkMode } = useTheme();
 
   const profileSections = [
     {
       id: 'profile',
-      title: 'Profile',
+      title: 'Profile Info',
       items: [
         {
-          id: 'edit-profile',
+          id: 'name',
           icon: 'person',
-          label: 'Edit Profile',
-          onPress: () => {},
+          label: 'Name',
+          value: 'John Doe',
+          onPress: () => navigation.navigate('ChangeName', { currentName: 'John Doe' }),
         },
         {
-          id: 'status',
+          id: 'about',
           icon: 'information-circle',
-          label: 'Status',
-          onPress: () => {},
+          label: 'About',
+          value: 'Hey there! I am using ChatApp',
+          onPress: () => navigation.navigate('ChangeAbout', { currentAbout: 'Hey there! I am using ChatApp' }),
         },
         {
           id: 'phone',
           icon: 'call',
-          label: 'Phone Number',
+          label: 'Phone',
           value: '+1 234 567 8900',
-          onPress: () => {},
+          onPress: () => navigation.navigate('ChangePhoneNumber', { currentPhone: '234 567 8900', currentCountryCode: '+1' }),
         },
       ],
     },
     {
-      id: 'account',
-      title: 'Account',
+      id: 'privacy',
+      title: 'Privacy',
       items: [
         {
-          id: 'privacy',
-          icon: 'lock-closed',
-          label: 'Privacy',
-          onPress: () => {},
+          id: 'last-seen',
+          icon: 'time',
+          label: 'Last seen',
+          value: 'Everyone',
+          onPress: () => navigation.navigate('LastSeenPrivacy', { currentOption: 'Everyone' }),
         },
         {
-          id: 'security',
-          icon: 'shield-checkmark',
-          label: 'Security',
-          onPress: () => {},
-        },
-        {
-          id: 'two-step',
-          icon: 'key',
-          label: 'Two-step verification',
-          onPress: () => {},
-        },
-        {
-          id: 'change-number',
-          icon: 'phone-portrait',
-          label: 'Change Number',
-          onPress: () => {},
-        },
-        {
-          id: 'request-info',
-          icon: 'document-text',
-          label: 'Request Account Info',
-          onPress: () => {},
-        },
-        {
-          id: 'delete-account',
-          icon: 'trash',
-          label: 'Delete My Account',
-          onPress: () => {},
-        },
-      ],
-    },
-    {
-      id: 'notifications',
-      title: 'Notifications',
-      items: [
-        {
-          id: 'notifications-toggle',
-          icon: 'notifications',
-          label: 'Notifications',
-          type: 'switch',
-          value: isNotificationsEnabled,
-          onValueChange: setIsNotificationsEnabled,
-        },
-        {
-          id: 'message-preview',
-          icon: 'eye',
-          label: 'Message Preview',
-          onPress: () => {},
-        },
-        {
-          id: 'read-receipts',
-          icon: 'checkmark-done',
-          label: 'Read Receipts',
-          type: 'switch',
-          value: isReadReceiptsEnabled,
-          onValueChange: setIsReadReceiptsEnabled,
-        },
-      ],
-    },
-    {
-      id: 'appearance',
-      title: 'Appearance',
-      items: [
-        {
-          id: 'theme',
-          icon: 'moon',
-          label: 'Dark theme',
-          type: 'switch',
-          value: isDarkMode,
-          onValueChange: toggleTheme,
-        },
-        {
-          id: 'wallpaper',
+          id: 'profile-photo',
           icon: 'image',
-          label: 'Chat wallpaper',
-          onPress: () => {},
+          label: 'Profile photo',
+          value: 'My contacts',
+          onPress: () => navigation.navigate('ProfilePhotoPrivacy', { currentOption: 'My contacts' }),
         },
         {
-          id: 'font-size',
-          icon: 'text',
-          label: 'Font Size',
-          onPress: () => {},
-        },
-      ],
-    },
-    {
-      id: 'storage',
-      title: 'Storage and Data',
-      items: [
-        {
-          id: 'storage-usage',
-          icon: 'folder',
-          label: 'Storage Usage',
-          onPress: () => {},
-        },
-        {
-          id: 'network',
-          icon: 'wifi',
-          label: 'Network Usage',
-          onPress: () => {},
-        },
-        {
-          id: 'auto-download',
-          icon: 'download',
-          label: 'Auto-Download Media',
-          onPress: () => {},
-        },
-      ],
-    },
-    {
-      id: 'help',
-      title: 'Help',
-      items: [
-        {
-          id: 'help-center',
+          id: 'about-privacy',
           icon: 'information-circle',
-          label: 'Help Center',
-          onPress: () => {},
+          label: 'About',
+          value: 'Everyone',
+          onPress: () => navigation.navigate('AboutPrivacy', { currentOption: 'Everyone' }),
+        },
+      ],
+    },
+    {
+      id: 'security',
+      title: 'Security',
+      items: [
+        {
+          id: 'blocked',
+          icon: 'ban',
+          label: 'Blocked contacts',
+          value: '2 contacts',
+          onPress: () => navigation.navigate('BlockedContacts'),
         },
         {
-          id: 'contact-us',
-          icon: 'mail',
-          label: 'Contact us',
-          onPress: () => {},
-        },
-        {
-          id: 'terms',
-          icon: 'document',
-          label: 'Terms and Privacy Policy',
-          onPress: () => {},
+          id: 'faceid',
+          icon: 'scan-circle',
+          label: 'Face ID',
+          value: 'Disabled',
+          onPress: () => navigation.navigate('FaceID'),
         },
       ],
     },
@@ -196,51 +98,49 @@ const ProfileScreen = ({ navigation }) => {
         borderBottomColor: colors.border,
       }]}
       onPress={item.onPress}
-      disabled={item.type === 'switch'}
     >
       <View style={styles.menuItemLeft}>
         <Ionicons 
           name={item.icon} 
           size={22} 
-          color={item.id === 'delete-account' ? colors.danger : colors.primary} 
+          color={colors.primary} 
           style={styles.menuIcon} 
         />
         <View style={styles.menuItemTextContainer}>
-          <Text style={[
-            styles.menuItemText, 
-            { 
-              color: item.id === 'delete-account' ? colors.danger : colors.text 
-            }
-          ]}>
+          <Text style={[styles.menuItemText, { color: colors.text }]}>
             {item.label}
           </Text>
-          {item.value && !item.type && (
+          {item.value && (
             <Text style={[styles.menuItemValue, { color: colors.textSecondary }]}>
               {item.value}
             </Text>
           )}
         </View>
       </View>
-      {item.type === 'switch' ? (
-        <Switch
-          value={item.value}
-          onValueChange={item.onValueChange}
-          trackColor={{ false: '#767577', true: colors.primary }}
-          thumbColor={colors.surface}
-          ios_backgroundColor="#3e3e3e"
-        />
-      ) : (
-        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
-      )}
+      <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
     </TouchableOpacity>
   );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerStyle: {
+        backgroundColor: isDarkMode ? '#000' : '#fff',
+      },
+      headerTintColor: isDarkMode ? '#fff' : '#000',
+    });
+  }, [navigation, isDarkMode]);
 
   return (
     <ScrollView 
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: 24 }}
     >
-      <View style={[styles.profileSection, { backgroundColor: colors.surface }]}>
+      <View style={[styles.profileSection, { 
+        backgroundColor: colors.surface,
+        marginHorizontal: 16,
+        borderRadius: 12,
+        marginTop: 16,
+      }]}>
         <TouchableOpacity style={styles.avatarContainer}>
           <Image
             source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }}
@@ -249,10 +149,10 @@ const ProfileScreen = ({ navigation }) => {
           <View style={styles.profileInfo}>
             <Text style={[styles.name, { color: colors.text }]}>John Doe</Text>
             <Text style={[styles.status, { color: colors.textSecondary }]}>
-              Hey there! I am using WhatsApp
+              Hey there! I am using ChatApp
             </Text>
           </View>
-          <Ionicons name="qr-code" size={24} color={colors.primary} />
+          <Ionicons name="qr-code" size={24} color={colors.primary} style={{ marginLeft: 8 }} />
         </TouchableOpacity>
       </View>
 
@@ -262,17 +162,15 @@ const ProfileScreen = ({ navigation }) => {
             {section.title}
           </Text>
           <View style={[styles.sectionContent, { 
-            borderTopColor: colors.border,
-            borderBottomColor: colors.border,
+            backgroundColor: colors.surface,
+            marginHorizontal: 16,
+            borderRadius: 8,
+            overflow: 'hidden',
           }]}>
             {section.items.map(renderSectionItem)}
           </View>
         </View>
       ))}
-
-      <Text style={[styles.version, { color: colors.textSecondary }]}>
-        WhatsApp Clone v1.0.0
-      </Text>
     </ScrollView>
   );
 };
@@ -283,7 +181,6 @@ const styles = StyleSheet.create({
   },
   profileSection: {
     padding: 16,
-    marginBottom: 20,
   },
   avatarContainer: {
     flexDirection: 'row',
@@ -305,26 +202,28 @@ const styles = StyleSheet.create({
   },
   status: {
     fontSize: 14,
+    opacity: 0.8,
   },
   section: {
-    marginBottom: 24,
+    marginTop: 24,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 16,
+    fontWeight: '500',
+    marginLeft: 32,
     marginBottom: 8,
     textTransform: 'uppercase',
   },
   sectionContent: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: 0,
+    borderBottomWidth: 0,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   menuItemLeft: {
@@ -339,18 +238,16 @@ const styles = StyleSheet.create({
   },
   menuItemTextContainer: {
     flex: 1,
+    marginRight: 12,
   },
   menuItemText: {
     fontSize: 16,
+    fontWeight: '400',
   },
   menuItemValue: {
     fontSize: 14,
-    marginTop: 2,
-  },
-  version: {
-    textAlign: 'center',
-    fontSize: 14,
-    marginVertical: 24,
+    marginTop: 4,
+    opacity: 0.7,
   },
 });
 

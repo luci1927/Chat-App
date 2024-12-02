@@ -18,7 +18,7 @@ import MessageBubble from '../components/MessageBubble';
 import { DUMMY_CHATS } from '../data/dummy-data';
 
 const SingleChatScreen = ({ route, navigation }) => {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const { chatId, name } = route.params || {};
   const [messages, setMessages] = useState([]);
   const flatListRef = useRef(null);
@@ -35,6 +35,17 @@ const SingleChatScreen = ({ route, navigation }) => {
     navigation.setOptions({
       headerShown: true,
       headerTitleAlign: 'left',
+      headerStyle: {
+        backgroundColor: isDarkMode ? '#000' : '#fff',
+      },
+      headerLeft: () => (
+        <TouchableOpacity 
+          style={styles.headerBackButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color={isDarkMode ? '#fff' : '#000'} />
+        </TouchableOpacity>
+      ),
       headerTitle: () => (
         <TouchableOpacity 
           style={styles.headerTitle}
@@ -45,41 +56,28 @@ const SingleChatScreen = ({ route, navigation }) => {
             style={styles.headerAvatar} 
           />
           <View style={styles.headerInfo}>
-            <Text style={styles.headerName}>
+            <Text style={[styles.headerName, { color: isDarkMode ? '#fff' : '#000' }]}>
               {DUMMY_CHATS.find(c => c.id === chatId)?.name}
             </Text>
-            <Text style={styles.headerStatus}>online</Text>
+            <Text style={[styles.headerStatus, { color: isDarkMode ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)' }]}>
+              online
+            </Text>
           </View>
-        </TouchableOpacity>
-      ),
-      headerLeft: () => (
-        <TouchableOpacity 
-          style={styles.headerBackButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back" size={28} color="#fff" />
         </TouchableOpacity>
       ),
       headerRight: () => (
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="videocam" size={24} color="#fff" />
+            <Ionicons name="call-outline" size={24} color={isDarkMode ? '#fff' : '#000'} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="call" size={22} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Ionicons name="ellipsis-vertical" size={22} color="#fff" />
+            <Ionicons name="videocam-outline" size={24} color={isDarkMode ? '#fff' : '#000'} />
           </TouchableOpacity>
         </View>
       ),
-      headerStyle: {
-        backgroundColor: colors.primary,
-        elevation: 0,
-        shadowOpacity: 0,
-      },
+      headerTintColor: isDarkMode ? '#fff' : '#000',
     });
-  }, [navigation, chatId, name, colors]);
+  }, [navigation, chatId, name, colors, isDarkMode]);
 
   const handleSendMessage = (messageData) => {
     const newMessage = {
@@ -149,11 +147,9 @@ const styles = StyleSheet.create({
   headerName: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#fff',
   },
   headerStatus: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.8)',
   },
   headerBackButton: {
     marginLeft: -8,

@@ -2,17 +2,23 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 
-const ChatListItem = ({ chat, onPress }) => {
+const ChatListItem = ({ chat, onPress, textColor, lastMessageColor, timeColor, borderColor }) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity 
+      style={[
+        styles.container, 
+        { borderBottomColor: borderColor }
+      ]} 
+      onPress={onPress}
+    >
       <Image source={{ uri: chat.avatar }} style={styles.avatar} />
       <View style={styles.contentContainer}>
         <View style={styles.headerContainer}>
-          <Text style={styles.name}>{chat.name}</Text>
-          <Text style={styles.time}>{chat.time}</Text>
+          <Text style={[styles.name, { color: textColor }]}>{chat.name}</Text>
+          <Text style={[styles.time, { color: timeColor }]}>{chat.time}</Text>
         </View>
         <View style={styles.messageContainer}>
-          <Text style={styles.lastMessage} numberOfLines={1}>
+          <Text style={[styles.lastMessage, { color: lastMessageColor }]} numberOfLines={1}>
             {chat.lastMessage.text}
           </Text>
           {chat.unreadCount > 0 && (
@@ -30,9 +36,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     padding: 15,
-    backgroundColor: '#fff',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E2E2E2',
   },
   avatar: {
     width: 50,
@@ -54,7 +58,6 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 12,
-    color: '#666',
   },
   messageContainer: {
     flexDirection: 'row',
