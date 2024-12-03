@@ -21,7 +21,7 @@ const ChatInput = ({ onSend }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.inputContainer, { backgroundColor: colors.background }]}>
         <TouchableOpacity style={styles.iconButton}>
           <Ionicons name="add-circle" size={20} color={colors.primary} />

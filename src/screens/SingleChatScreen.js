@@ -80,15 +80,45 @@ const SingleChatScreen = ({ route, navigation }) => {
   }, [navigation, chatId, name, colors, isDarkMode]);
 
   const handleSendMessage = (messageData) => {
+    // Create message with initial 'sending' status
     const newMessage = {
       id: String(Date.now()),
+      timestamp: new Date().toISOString(),
       ...messageData,
       isSent: true,
+      status: 'sending',
     };
     setMessages(prevMessages => [...prevMessages, newMessage]);
     
+    // Simulate message being sent
     setTimeout(() => {
-      flatListRef.current?.scrollToEnd();
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === newMessage.id ? { ...msg, status: 'sent' } : msg
+        )
+      );
+      
+      // Simulate message being delivered
+      setTimeout(() => {
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === newMessage.id ? { ...msg, status: 'delivered' } : msg
+          )
+        );
+        
+        // Simulate message being seen
+        setTimeout(() => {
+          setMessages(prev => 
+            prev.map(msg => 
+              msg.id === newMessage.id ? { ...msg, status: 'seen' } : msg
+            )
+          );
+        }, 2000);
+      }, 1000);
+    }, 500);
+
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
   };
 
